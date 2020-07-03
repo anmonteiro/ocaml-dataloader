@@ -11,11 +11,9 @@ rec {
     pname = "dataloader";
     version = "0.0.1-dev";
 
-    buildInputs = [ alcotest ];
-
     src = lib.gitignoreSource ./..;
 
-    inherit doCheck;
+    doCheck = false;
   };
 
   dataloader-lwt = buildDunePackage {
@@ -24,6 +22,10 @@ rec {
 
     src = lib.gitignoreSource ./..;
 
-    propagatedBuildInputs = [ dataloader ];
+    inherit doCheck;
+
+    buildInputs = [ alcotest ];
+
+    propagatedBuildInputs = [ dataloader lwt ];
   };
 }
