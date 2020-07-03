@@ -1,33 +1,29 @@
-{ ... }@args:
+{ ocamlVersion }:
 
 let
-  pkgs = import ../sources.nix { ocamlVersion= args.ocamlVersion; };
+  pkgs = import ../sources.nix { inherit ocamlVersion; };
   inherit (pkgs) lib stdenv fetchTarball ocamlPackages;
 
-  piafPkgs =  (import ./.. {
+  dataloaderPkgs =  (import ./.. {
     inherit pkgs;
     doCheck = true;
   });
 
-  test = pkg:
-  let piafDrvs = lib.filterAttrs (_: value: lib.isDerivation value) pkg;
+  dataloaderDrvs = lib.filterAttrs (_: value: lib.isDerivation value) dataloaderPkgs;
+
   in
+
   stdenv.mkDerivation {
-    name = "piaf-tests";
+    name = "dataloader-tests";
     src = ./../..;
     dontBuild = true;
     installPhase = ''
       touch $out
     '';
-    buildInputs = (lib.attrValues piafDrvs) ++ (with ocamlPackages; [ ocaml dune findlib pkgs.ocamlformat ]);
+    buildInputs = (lib.attrValues dataloaderDrvs) ++ (with ocamlPackages; [ ocaml dune findlib pkgs.ocamlformat ]);
     doCheck = true;
     checkPhase = ''
       # Check code is formatted with OCamlformat
       dune build @fmt
     '';
-  };
-in
-  {
-    native = test piafPkgs.native;
-    musl64 = test piafPkgs.musl64;
   }
